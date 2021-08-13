@@ -40,6 +40,7 @@ router.post("/text-to-speech", (req, res) => {
 });
 
 router.post("/audio-to-text", async (req, res) => {
+  console.log(req.files);
   let fileName = Date.now() + "_" + req.files.file.name;
   let file = req.files.file;
   let uploadPath = __dirname + "/uploads/" + fileName;
