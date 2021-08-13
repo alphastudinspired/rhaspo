@@ -100,44 +100,6 @@ router.post("/audio-to-text", async (req, res) => {
     recognizer.startContinuousRecognitionAsync();
     // if (res) console.log(fs.readFileSync(uploadPath));
   });
-
-  // res.send("done");
-  // var readStream = fs.createReadStream(path.join(__dirname, "test.wav"));
-  // // console.log(fs.readFileSync(path.join(__dirname, "test.wav")));
-  // let pushStream = sdk.AudioInputStream.createPushStream();
-
-  // fs.createReadStream(path.join(__dirname, "test.wav"))
-  //   .on("data", function (arrayBuffer) {
-  //     pushStream.write(arrayBuffer.slice());
-  //   })
-  //   .on("end", function () {
-  //     pushStream.close();
-  //   });
-
-  // let audioConfig = sdk.AudioConfig.fromStreamInput(pushStream);
-  // let recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
-  // recognizer.recognizeOnceAsync((result) => {
-  //   console.log(`RECOGNIZED: Text=${result.text}`);
-  //   res.send(result.text);
-  //   recognizer.close();
-  // });
-  // // readStream.on("open", function () {
-  // //   console.log(readStream.pipe(res));
-  // //   // let audioConfig = sdk.AudioConfig.fromWavFileInput(readStream.pipe(res));
-  // //   //   let recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
-
-  // //   //   recognizer.recognizeOnceAsync((result) => {
-  // //   //     console.log(`RECOGNIZED: Text=${result.text}`);
-  // //   //     res.send(result.text);
-  // //   //     recognizer.close();
-  // //   //   });
-  // // });
-
-  // // readStream.on("error", function () {
-  // //   res.end(err);
-  // // });
-
-  // console.log("hello world");
 });
 
 module.exports = router;
