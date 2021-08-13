@@ -44,10 +44,12 @@ router.post("/audio-to-text", async (req, res) => {
   let fileName = Date.now() + "_" + req.files.file.name;
   let file = req.files.file;
   let uploadPath = __dirname + "/uploads/" + fileName;
+  console.log(__dirname + "/uploads");
 
   file.mv(uploadPath, (err) => {
     if (err) res.send(err);
 
+    console.log(fs.readFileSync(uploadPath));
     let audioConfig = sdk.AudioConfig.fromWavFileInput(
       fs.readFileSync(uploadPath)
     );
