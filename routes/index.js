@@ -3,14 +3,6 @@ var router = express.Router();
 const sdk = require("microsoft-cognitiveservices-speech-sdk");
 const Gtts = require("gtts");
 const fs = require("fs");
-const cp = require("child_process");
-// var youtubeMp3Converter = require("youtube-mp3-converter");
-var ffmpeg = require("ffmpeg-static");
-const ytdl = require("ytdl-core");
-var multer = require("multer");
-var upload = multer({ dest: "uploads/" });
-
-const path = require("path");
 
 const speechConfig = sdk.SpeechConfig.fromSubscription(
   "f23235972e5c4432854dfd85d9403472",
@@ -48,54 +40,67 @@ router.post("/text-to-speech", (req, res) => {
 });
 
 router.post("/audio-to-text", async (req, res) => {
-  let audioConfig = sdk.AudioConfig.fromWavFileInput(
-    fs.readFileSync(path.join(__dirname, "test.wav"))
-  );
-  let text = "";
-  let lastWord = "";
-  // var audioConfig = fs.readFileSync(path.join(__dirname, "test.wav"));
-  const recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
-  recognizer.recognizing = (s, e) => {
-    console.log(`RECOGNIZING: Text=${e.result.text}`);
+  let fileName = Date.now() + "_" + req.files.file.name;
+  let file = req.files.file;
+  let uploadPath = __dirname + "/uploads/" + fileName;
 
-    let getText = e.result.text;
+  file.mv(uploadPath, (err) => {
+    if (err) res.send(err);
 
-    if (lastWord.length > getText.length) {
+    let audioConfig = sdk.AudioConfig.fromWavFileInput(
+      fs.readFileSync(uploadPath)
+    );
+    let text = "";
+    let lastWord = "";
+    // var audioConfig = fs.readFileSync(path.join(__dirname, "test.wav"));
+    const recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
+    recognizer.recognizing = (s, e) => {
+      console.log(`RECOGNIZING: Text=${e.result.text}`);
+
+      let getText = e.result.text;
+
+      if (lastWord.length > getText.length) {
+        lastWord = getText;
+        text += lastWord;
+      }
       lastWord = getText;
-      text += lastWord;
-    }
-    lastWord = getText;
-  };
-  recognizer.recognized = (s, e) => {
-    if (e.result.reason == ResultReason.RecognizedSpeech) {
-      console.log(`RECOGNIZED: Text=${e.result.text}`);
-    } else if (e.result.reason == ResultReason.NoMatch) {
-      console.log("NOMATCH: Speech could not be recognized.");
-    }
-  };
+    };
+    recognizer.recognized = (s, e) => {
+      if (e.result.reason == ResultReason.RecognizedSpeech) {
+        console.log(`RECOGNIZED: Text=${e.result.text}`);
+      } else if (e.result.reason == ResultReason.NoMatch) {
+        console.log("NOMATCH: Speech could not be recognized.");
+      }
+    };
 
-  recognizer.canceled = (s, e) => {
-    console.log(`CANCELED: Reason=${e.reason}`);
+    recognizer.canceled = (s, e) => {
+      console.log(`CANCELED: Reason=${e.reason}`);
 
-    text += lastWord + ".";
+      text += lastWord + ".";
 
-    if (e.reason == CancellationReason.Error) {
-      console.log(`"CANCELED: ErrorCode=${e.errorCode}`);
-      console.log(`"CANCELED: ErrorDetails=${e.errorDetails}`);
-      console.log("CANCELED: Did you update the key and location/region info?");
-    }
+      if (e.reason == CancellationReason.Error) {
+        console.log(`"CANCELED: ErrorCode=${e.errorCode}`);
+        console.log(`"CANCELED: ErrorDetails=${e.errorDetails}`);
+        console.log(
+          "CANCELED: Did you update the key and location/region info?"
+        );
+      }
 
-    recognizer.stopContinuousRecognitionAsync();
-  };
+      recognizer.stopContinuousRecognitionAsync();
+    };
 
-  recognizer.sessionStopped = (s, e) => {
-    console.log("\n    Session stopped event.");
-    recognizer.stopContinuousRecognitionAsync();
-    console.log("textlast == >", text);
-    res.send(text);
-  };
+    recognizer.sessionStopped = (s, e) => {
+      console.log("\n    Session stopped event.");
+      recognizer.stopContinuousRecognitionAsync();
+      console.log("textlast == >", text);
+      fs.unlinkSync(uploadPath);
+      res.status(200).send(text);
+    };
 
-  recognizer.startContinuousRecognitionAsync();
+    recognizer.startContinuousRecognitionAsync();
+    // if (res) console.log(fs.readFileSync(uploadPath));
+  });
+
   // res.send("done");
   // var readStream = fs.createReadStream(path.join(__dirname, "test.wav"));
   // // console.log(fs.readFileSync(path.join(__dirname, "test.wav")));
