@@ -65,7 +65,7 @@ router.post("/audio-to-text", async (req, res) => {
 
       if (lastWord.length > getText.length) {
         lastWord = getText;
-        text += lastWord;
+        text += lastWord + " ";
       }
       lastWord = getText;
     };
@@ -98,7 +98,7 @@ router.post("/audio-to-text", async (req, res) => {
       recognizer.stopContinuousRecognitionAsync();
       console.log("textlast == >", text);
       fs.unlinkSync(uploadPath);
-      res.status(200).send(text);
+      res.send(text);
     };
 
     recognizer.startContinuousRecognitionAsync();
