@@ -64,8 +64,8 @@ router.post("/audio-to-text", async (req, res) => {
       let getText = e.result.text;
 
       if (lastWord.length > getText.length) {
-        lastWord = getText;
         text += lastWord + " ";
+        lastWord = getText;
       }
       lastWord = getText;
     };
